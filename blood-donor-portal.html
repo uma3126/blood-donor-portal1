@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blood Donor & Emergency Blood Availability Portal</title>
+<style>
+:root{--bg:#fff8f7;--fg:#2a1416;--card:#fff;--mut:#7a5f62;--bd:#eed5d3;--red:#b3122b;--redfg:#fff;--ok:#1d7a46;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1011;--fg:#f6e8e7;--card:#2a1819;--mut:#c4a5a7;--bd:#4a2c2e;--red:#e63a52;--ok:#4cc27f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1c1011;--fg:#f6e8e7;--card:#2a1819;--mut:#c4a5a7;--bd:#4a2c2e;--red:#e63a52;--ok:#4cc27f;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 Georgia,"Times New Roman",serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+h1,h2,h3,button,label,input,select,nav{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);border-bottom:1px solid var(--bd);padding:10px 14px}
+header h1{font-size:1.05rem;margin:0;line-height:1.2}
+header p{margin:0;color:var(--mut);font-size:.8rem}
+nav{display:flex;gap:6px;overflow-x:auto;padding:8px 14px;background:var(--bg);position:sticky;top:calc(env(safe-area-inset-top,0px) + 56px);z-index:8}
+nav button{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:8px 13px;border-radius:20px;font-size:.88rem;cursor:pointer}
+nav button.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+nav button.sos{background:var(--red);color:var(--redfg);border-color:var(--red);font-weight:700}
+main{max-width:720px;margin:0 auto;padding:6px 14px 40px}
+section{display:none}section.on{display:block}
+h2{font-size:1.25rem;margin:14px 0 6px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;margin:10px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:.8rem;color:var(--mut);margin-bottom:3px}
+input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg);font-size:1rem}
+input[type=checkbox]{width:auto;margin-right:6px}
+.ck{display:flex;align-items:flex-start;color:var(--fg);font-size:.88rem;margin:8px 0}
+.btn{border:0;background:var(--red);color:var(--redfg);padding:11px 16px;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;font-family:system-ui,sans-serif}
+.btn.alt{background:transparent;color:var(--fg);border:1px solid var(--bd)}
+.btn.sm{padding:6px 10px;font-size:.8rem}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sp{justify-content:space-between}
+.bg{display:inline-block;min-width:38px;text-align:center;background:var(--red);color:var(--redfg);border-radius:6px;padding:2px 7px;font:700 .85rem system-ui,sans-serif}
+.mut{color:var(--mut);font-size:.85rem}
+.ok{color:var(--ok);font-weight:600}.no{color:var(--red);font-weight:600}
+.big{font-size:1.9rem;line-height:1.15;margin:12px 0 4px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:10px;text-align:center;padding:10px 4px}
+.stat b{display:block;font:700 1.2rem system-ui,sans-serif;color:var(--red)}
+.stat span{font-size:.75rem;color:var(--mut)}
+.bar{height:10px;background:var(--red);border-radius:5px}
+.msg{background:var(--bg);border:1px dashed var(--bd);border-radius:8px;padding:8px;font-size:.85rem;margin:6px 0}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font:.85rem system-ui,sans-serif}td,th{padding:6px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font:.9rem system-ui,sans-serif;display:none;z-index:20;max-width:90%}
+a{color:var(--red)}
+</style>
+</head>
+<body>
+<header><h1>Blood Donor &amp; Emergency Blood Availability Portal</h1><p>Community project · prototype</p></header>
+<nav id="nav"></nav>
+<main>
+
+<section id="home">
+  <div class="big">Every minute counts when blood is needed.</div>
+  <p class="mut">Register as a donor, search for available donors, or raise an emergency request that alerts matching donors within your chosen distance.</p>
+  <div class="stats" id="stats"></div>
+  <div class="card">
+    <h3 style="margin:0 0 6px">Try the demo</h3>
+    <p class="mut" style="margin:0 0 8px">Adds 12 sample donors around your location (or a default city if location is blocked), so you can test emergency alerts.</p>
+    <button class="btn" onclick="sample()">Add sample donors</button>
+  </div>
+  <h2>Availability by blood group</h2>
+  <div id="board"></div>
+</section>
+
+<section id="reg">
+  <h2>Register as a donor</h2>
+  <form id="rf" class="card" novalidate>
+    <div class="grid">
+      <div><label>Full name</label><input name="name" required></div>
+      <div><label>Age (18–65)</label><input name="age" type="number" min="18" max="65" required></div>
+      <div><label>Gender</label><select name="gender"><option>Female</option><option>Male</option><option>Other</option></select></div>
+      <div><label>Blood group</label><select name="group"></select></div>
+      <div><label>Phone (with country code)</label><input name="phone" inputmode="tel" placeholder="919876543210" required></div>
+      <div><label>Email</label><input name="email" type="email"></div>
+      <div><label>City</label><input name="city" required></div>
+      <div><label>Area</label><input name="area"></div>
+      <div><label>PIN code</label><input name="pin" inputmode="numeric"></div>
+      <div><label>Last donation date</label><input name="last" type="date"></div>
+      <div><label>Latitude</label><input name="lat" id="rlat" inputmode="decimal" required></div>
+      <div><label>Longitude</label><input name="lng" id="rlng" inputmode="decimal" required></div>
+    </div>
+    <div class="row" style="margin:10px 0"><button type="button" class="btn alt sm" onclick="loc('r')">Use my location</button><span class="mut" id="rloc"></span></div>
+    <label class="ck"><input type="checkbox" name="avail" checked>I am available to donate now</label>
+    <label class="ck"><input type="checkbox" name="consent">I agree to receive emergency alerts by SMS, WhatsApp or email</label>
+    <button class="btn" type="submit">Save my details</button>
+  </form>
+</section>
+
+<section id="find">
+  <h2>Search donors</h2>
+  <div class="card grid">
+    <div><label>Blood group</label><select id="sg"></select></div>
+    <div><label>City or area</label><input id="sc"></div>
+    <label class="ck" style="grid-column:1/-1;margin:0"><input type="checkbox" id="sa" checked>Eligible donors only</label>
+  </div>
+  <div id="sres"></div>
+</section>
+
+<section id="sos">
+  <h2>Emergency blood request</h2>
+  <form id="ef" class="card" novalidate>
+    <div class="grid">
+      <div><label>Patient name</label><input name="patient" required></div>
+      <div><label>Blood group needed</label><select name="group"></select></div>
+      <div><label>Units</label><input name="units" type="number" min="1" value="1"></div>
+      <div><label>Urgency</label><select name="urgency"><option>Critical (now)</option><option>Within 6 hours</option><option>Within 24 hours</option></select></div>
+      <div><label>Hospital</label><input name="hospital" required></div>
+      <div><label>City</label><input name="city" required></div>
+      <div><label>Contact number</label><input name="contact" inputmode="tel" placeholder="919876543210" required></div>
+      <div><label>Search radius</label><select name="radius"><option value="5">5 km</option><option value="10" selected>10 km</option><option value="25">25 km</option><option value="50">50 km</option></select></div>
+      <div><label>Latitude</label><input name="lat" id="elat" inputmode="decimal" required></div>
+      <div><label>Longitude</label><input name="lng" id="elng" inputmode="decimal" required></div>
+    </div>
+    <div class="row" style="margin:10px 0"><button type="button" class="btn alt sm" onclick="loc('e')">Use hospital location (my location)</button><span class="mut" id="eloc"></span></div>
+    <button class="btn" type="submit">Alert nearby donors</button>
+  </form>
+  <div id="eres"></div>
+  <h2>Request status</h2>
+  <div id="reqs"></div>
+</section>
+
+<section id="adm">
+  <h2>Admin dashboard</h2>
+  <div id="adin" class="card"><label>Admin passcode (demo: admin123)</label><div class="row"><input id="pw" type="password" style="flex:1"><button class="btn" onclick="login()">Open</button></div></div>
+  <div id="adbody" style="display:none"></div>
+</section>
+
+</main>
+<div id="toast"></div>
+
+<script>
+const G=['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+const COMP={'A+':['A+','A-','O+','O-'],'A-':['A-','O-'],'B+':['B+','B-','O+','O-'],'B-':['B-','O-'],'AB+':G,'AB-':['A-','B-','AB-','O-'],'O+':['O+','O-'],'O-':['O-']};
+const $=s=>document.querySelector(s);
+let S={donors:[],reqs:[],alerts:[],loc:null},isAdmin=false,lastReq=0;
+try{const x=JSON.parse(localStorage.getItem('bdp'));if(x)S=Object.assign(S,x)}catch(e){}
+const save=()=>{try{localStorage.setItem('bdp',JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mask=p=>p.length>5?p.slice(0,2)+'••••••'+p.slice(-2):'••••';
+const eligible=d=>d.avail&&d.consent&&(!d.last||(Date.now()-new Date(d.last))/864e5>=90);
+function km(a,b,c,d){const r=x=>x*Math.PI/180,h=Math.sin(r(c-a)/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(r(d-b)/2)**2;return 12742*Math.asin(Math.sqrt(h))}
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
+const opts=(any)=>(any?'<option value="">Any</option>':'')+G.map(g=>`<option>${g}</option>`).join('');
+
+// navigation
+const TABS=[['home','Home'],['reg','Register'],['find','Search'],['sos','Emergency'],['adm','Admin']];
+$('#nav').innerHTML=TABS.map(t=>`<button data-t="${t[0]}" class="${t[0]=='sos'?'sos':''}">${t[1]}</button>`).join('');
+$('#nav').onclick=e=>{const t=e.target.dataset.t;if(t)show(t)};
+function show(id){document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==id));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==id));
+  history.replaceState(null,'','#'+id);render();window.scrollTo(0,0)}
+
+document.querySelectorAll('select[name=group]').forEach(s=>s.innerHTML=opts());
+$('#sg').innerHTML=opts(true);
+
+// location
+function loc(p,cb){const out=$('#'+p+'loc');if(out)out.textContent='Locating…';
+  const done=(la,ln,note)=>{S.loc=[la,ln];save();['r','e'].forEach(q=>{$('#'+q+'lat').value=la.toFixed(5);$('#'+q+'lng').value=ln.toFixed(5)});if(out)out.textContent=note;if(cb)cb(la,ln)};
+  if(!navigator.geolocation){done(17.385,78.4867,'Using default location');return}
+  navigator.geolocation.getCurrentPosition(x=>done(x.coords.latitude,x.coords.longitude,'Location set'),()=>done(17.385,78.4867,'Location blocked, using default city'),{timeout:6000});
+}
+
+// register
+$('#rf').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));
+  const ph=(f.phone||'').replace(/\D/g,''),age=+f.age,lat=parseFloat(f.lat),lng=parseFloat(f.lng);
+  if(!f.name.trim())return toast('Enter your name');
+  if(!(age>=18&&age<=65))return toast('Donors must be 18 to 65 years old');
+  if(ph.length<10||ph.length>13)return toast('Enter a valid phone number');
+  if(!f.city.trim())return toast('Enter your city');
+  if(isNaN(lat)||isNaN(lng))return toast('Tap “Use my location” to set coordinates');
+  if(!f.consent)return toast('Tick the consent box to receive alerts');
+  S.donors.push({id:Date.now(),name:f.name.trim(),age,gender:f.gender,group:f.group,phone:ph,email:f.email,city:f.city.trim(),area:f.area,pin:f.pin,lat,lng,last:f.last,avail:!!f.avail,consent:true});
+  save();e.target.reset();toast('Thank you! Your details are saved');show('home')};
+
+// search
+['sg','sc','sa'].forEach(i=>$('#'+i).oninput=renderSearch);
+function renderSearch(){const g=$('#sg').value,c=$('#sc').value.trim().toLowerCase(),a=$('#sa').checked;
+  const r=S.donors.filter(d=>(!g||d.group==g)&&(!c||(d.city+' '+d.area).toLowerCase().includes(c))&&(!a||eligible(d)));
+  $('#sres').innerHTML=r.length?r.map(d=>`<div class="card row sp"><div><span class="bg">${esc(d.group)}</span> <b>${esc(d.name)}</b><div class="mut">${esc(d.area?d.area+', ':'')}${esc(d.city)} · ${mask(d.phone)}</div><div class="${eligible(d)?'ok':'no'}">${eligible(d)?'Available':'Not eligible now'}</div></div><button class="btn sm" onclick="toast('Contact request sent to ${esc(d.name).replace(/'/g,'’')}')">Contact</button></div>`).join(''):'<p class="mut">No donors match yet. Try another blood group or city, or register as a donor.</p>'}
+
+// emergency
+$('#ef').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));
+  if(Date.now()-lastReq<20000)return toast('Please wait a few seconds before sending another request');
+  const lat=parseFloat(f.lat),lng=parseFloat(f.lng),rad=+f.radius,ph=f.contact.replace(/\D/g,'');
+  if(!f.patient.trim()||!f.hospital.trim()||!f.city.trim())return toast('Fill in patient, hospital and city');
+  if(ph.length<10)return toast('Enter a valid contact number');
+  if(isNaN(lat)||isNaN(lng))return toast('Tap “Use hospital location” to set coordinates');
+  lastReq=Date.now();
+  const m=S.donors.filter(d=>eligible(d)&&COMP[f.group].includes(d.group)).map(d=>({d,k:km(lat,lng,d.lat,d.lng)})).filter(x=>x.k<=rad).sort((a,b)=>a.k-b.k);
+  const rid=Date.now(),msg=`URGENT: ${f.group} blood needed at ${f.hospital.trim()}, ${f.city.trim()}. Contact: ${ph}. Reply YES if you can donate.`;
+  S.reqs.unshift({id:rid,patient:f.patient.trim(),group:f.group,units:f.units,hospital:f.hospital.trim(),city:f.city.trim(),contact:ph,urgency:f.urgency,rad,time:new Date().toLocaleString(),open:true,msg});
+  m.forEach(x=>S.alerts.push({id:rid+'-'+x.d.id,rid,did:x.d.id,km:x.k,status:'sent'}));
+  save();
+  $('#eres').innerHTML=`<div class="card"><b>${m.length} eligible donor${m.length==1?'':'s'} within ${rad} km</b><div class="msg">${esc(msg)}</div>${m.length?'<p class="mut">Prototype mode: tap a button to send the alert from your own phone. The live version sends it automatically from the server.</p>':'<p class="mut">No donors found. Try a larger radius or add sample donors from the Home page.</p>'}</div>`;
+  render();toast('Emergency request created')};
+
+function reqs(){return S.reqs.length?S.reqs.map(r=>{const al=S.alerts.filter(a=>a.rid==r.id),acc=al.filter(a=>a.status=='accepted');
+  return `<div class="card"><div class="row sp"><div><span class="bg">${esc(r.group)}</span> <b>${esc(r.patient)}</b> · ${esc(r.units)} unit(s)</div><span class="${r.open?'no':'mut'}">${r.open?'Open':'Closed'}</span></div>
+  <div class="mut">${esc(r.hospital)}, ${esc(r.city)} · ${esc(r.urgency)} · ${esc(r.time)}</div>
+  <p class="mut" style="margin:6px 0 2px">${al.length} alerted · ${acc.length} accepted</p>
+  ${acc.map(a=>{const d=S.donors.find(x=>x.id==a.did);return d?`<div class="ok">${esc(d.name)} (${esc(d.group)}) accepted · <a href="tel:+${esc(d.phone)}">call</a></div>`:''}).join('')}
+  ${al.map(a=>{const d=S.donors.find(x=>x.id==a.did);if(!d)return '';const t=encodeURIComponent(r.msg);
+   return `<div class="row sp" style="border-top:1px solid var(--bd);padding:6px 0"><span>${esc(d.name)} <span class="bg">${esc(d.group)}</span> <span class="mut">${a.km.toFixed(1)} km · ${a.status}</span></span>
+   <span class="row">${a.status=='sent'?`<a class="btn sm alt" href="sms:+${esc(d.phone)}?body=${t}">SMS</a><a class="btn sm alt" target="_blank" rel="noopener" href="https://wa.me/${esc(d.phone)}?text=${t}">WhatsApp</a><button class="btn sm" onclick="resp('${a.id}','accepted')">Accept</button><button class="btn sm alt" onclick="resp('${a.id}','declined')">Decline</button>`:''}</span></div>`}).join('')}
+  </div>`}).join(''):'<p class="mut">No requests yet. Submit the form above to alert nearby donors.</p>'}
+function resp(id,s){const a=S.alerts.find(x=>x.id==id);if(a){a.status=s;save();render()}}
+
+// home board
+function board(){const e=S.donors.filter(eligible),mx=Math.max(1,...G.map(g=>e.filter(d=>d.group==g).length));
+  $('#stats').innerHTML=[[S.donors.length,'Donors'],[e.length,'Eligible'],[S.reqs.filter(r=>r.open).length,'Open requests'],[S.alerts.length,'Alerts sent']].map(x=>`<div class="stat"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('');
+  $('#board').innerHTML=G.map(g=>{const n=e.filter(d=>d.group==g).length;return `<div class="row" style="margin:6px 0"><span class="bg">${g}</span><div style="flex:1"><div class="bar" style="width:${Math.max(3,n/mx*100)}%"></div></div><b style="font-family:system-ui">${n}</b></div>`}).join('')}
+
+// sample data
+function sample(){loc('x',(la,ln)=>{const N=['Asha','Ravi','Meena','Imran','Priya','Kiran','Sana','Arjun','Neha','Vikram','Lakshmi','Farah'];
+  N.forEach((n,i)=>S.donors.push({id:Date.now()+i,name:n+' (sample)',age:20+i,gender:i%2?'Male':'Female',group:G[(i*3+1)%8],phone:'91'+(9000000000+Math.floor(Math.random()*99999999)),email:'',city:'Demo city',area:'Area '+(i+1),pin:'',lat:la+(Math.random()-.5)*.14,lng:ln+(Math.random()-.5)*.14,last:'',avail:true,consent:true}));
+  save();render();toast('12 sample donors added')})}
+
+// admin
+function login(){if($('#pw').value=='admin123'){isAdmin=true;render()}else toast('Wrong passcode')}
+function adm(){if(!isAdmin)return;$('#adin').style.display='none';const b=$('#adbody');b.style.display='block';
+  b.innerHTML=`<h3>Donors (${S.donors.length})</h3><div class="card tw"><table><tr><th>Name</th><th>Group</th><th>City</th><th>Status</th><th></th></tr>${S.donors.map(d=>`<tr><td>${esc(d.name)}</td><td>${esc(d.group)}</td><td>${esc(d.city)}</td><td>${eligible(d)?'Eligible':'Not eligible'}</td><td><button class="btn sm alt" onclick="delD(${d.id})">Delete</button></td></tr>`).join('')||'<tr><td>No donors yet</td></tr>'}</table></div>
+  <h3>Requests (${S.reqs.length})</h3><div class="card tw"><table><tr><th>Patient</th><th>Group</th><th>Alerts</th><th>Status</th><th></th></tr>${S.reqs.map(r=>`<tr><td>${esc(r.patient)}</td><td>${esc(r.group)}</td><td>${S.alerts.filter(a=>a.rid==r.id).length}</td><td>${r.open?'Open':'Closed'}</td><td>${r.open?`<button class="btn sm alt" onclick="closeR(${r.id})">Close</button>`:''}</td></tr>`).join('')||'<tr><td>No requests yet</td></tr>'}</table></div>
+  <div class="row"><button class="btn alt sm" onclick="if(confirm('Delete all data?')){S={donors:[],reqs:[],alerts:[],loc:null};save();render()}">Reset all data</button></div>`}
+function delD(id){S.donors=S.donors.filter(d=>d.id!=id);S.alerts=S.alerts.filter(a=>a.did!=id);save();render()}
+function closeR(id){const r=S.reqs.find(x=>x.id==id);if(r){r.open=false;save();render()}}
+
+function render(){board();renderSearch();$('#reqs').innerHTML=reqs();adm()}
+if(S.loc){['r','e'].forEach(q=>{$('#'+q+'lat').value=S.loc[0].toFixed(5);$('#'+q+'lng').value=S.loc[1].toFixed(5)})}
+const h=location.hash.slice(1);show(TABS.some(t=>t[0]==h)?h:'home');
+</script>
+</body>
+</html>
